@@ -372,7 +372,7 @@ class Npart(custom_function):
 
 #Monte-Carlo Glauber part
 class Nbp_mc(custom_function):
-    def __init__(self, nuclei1, nuclei2, sigma, entries=2):
+    def __init__(self, nuclei1, nuclei2, sigma, entries=1000):
         r'''
         Nbp_mc would generate a set of nucleon matters for two nuclei respectively, 
         however, in this homework they are all Au.
@@ -387,8 +387,8 @@ class Nbp_mc(custom_function):
         self.sigma = sigma
         self.entries = entries
         self.args['bmin'] = 0
-        self.args['bmax'] = 1
-        self.args['bbins'] = 1
+        self.args['bmax'] = 14
+        self.args['bbins'] = 15
         self.args['label1'] = r'$<N_{\mathrm{coll}}>$'
         self.args['label2'] = r'$<N_{\mathrm{part}}>$'
         self.args['data_path'] = './Nbp_data.csv'
@@ -403,7 +403,7 @@ class Nbp_mc(custom_function):
         for nid_1 in range(self.A1):
             projectile = self.nuleon1[nid_1, :].reshape(1, -1)
             dist = distance.Euclidean(projectile, self.nuleon2)
-            dist = np.where(dist**2*np.pi<=self.sigma, 1, 0)
+            dist = np.where(np.pi*dist**2<=self.sigma, 1, 0)
             num = dist.sum()
             Ncoll += num
             if num > 0:
