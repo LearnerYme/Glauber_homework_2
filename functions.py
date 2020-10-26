@@ -465,5 +465,83 @@ class Nbp_mc(custom_function):
                 fig.show()
         return
 
+class prob(custom_function):
+    def __init__(self, bmax, load_path, entries=100000):
+        super(prob, self).__init__()
+        data = np.loadtxt(load_path, delimiter=',')
+        self.b = data[:, 0]
+        self.Ncoll = data[:, 1]
+        self.Npart = data[:, 2]
+        self.bsq = bsq(bmax)
+        self.rdg = rdg(self.bsq.function, [0, bmax], [0, self.bsq.function(bmax)])
+        self.entries = entries
+        self.args['bbins'] = 14
+        self.args['Ncollbins'] = 14
+        self.args['Npartbins'] = 14
+        self.args['label1'] = 'b'
+        self.args['label2'] = r'$<N_{\mathrm{coll}}>$'
+        self.args['label3'] = r'$<N_{\mathrm{part}}>$'
+        self.args['data_path'] = './prob_data.csv'        
+        return
 
+    def simulation(self):
+        r'''
+        This method returns a index,
+        use this index to derive b, Ncoll and Npart of this simulation.
+        '''
+        return find_bin.find_bin1d(self.rdg.get_random(), self.b)
+
+    def get_value(self):
+        if self.valued is False:
+            b = []
+            Ncoll = []
+            Npart = []
+            for entry in range(self.entries):
+                print('\rEntry: %d of %d...'%(entry+1, self.entries), end='')
+                idx = self.simulation()
+                b.append(self.b[idx])
+                Ncoll.append(self.Ncoll[idx])
+                Npart.append(self.Npart[idx])
+            self.b_res = np.array(b)
+            self.Ncoll_res = np.array(Ncoll)
+            self.Npart_res = np.array(Npart)
+        self.valued = True
+        return
+
+    def save_data(self):
+        res = np.concatenate((self.b_res.reshape(-1, 1), self.Ncoll_res.reshape(-1, 1), self.Npart_res.reshape(-1, 1)), 1)
+        np.savetxt(self.args['data_path'], res, fmt='%.4f', delimiter=',')
+        return
+
+    def plot_func(self):
+        r'''
+        Note: if your computer has not install SciencePlots, 
+        replace the list following plt.style.context by ['classic'].
+        '''
+        args = self.args
+        self.get_value()
+        self.save_data()
+        with plt.style.context(['ieee', 'science', 'no-latex', 'grid']):
+            fig, ax = plt.subplots(2, 2)
+            fig.set_size_inches(8, 8)
+            ax[0, 0].hist(self.b_res, histtype='step', density=True, label=args['label1'])
+            ax[0, 1].hist(self.Ncoll_res, histtype='step', density=True, label=args['label2'])
+            ax[1, 1].hist(self.Npart_res, histtype='step', density=True, label=args['label3'])
+            ax[0, 0].set_xlabel(r'$b\ \mathrm{fm}$')
+            ax[0, 0].set_ylabel(r'$P(b)$')
+            ax[0, 1].set_xlabel(r'$<N_{\mathrm{coll}}>$')
+            ax[0, 1].set_ylabel(r'$P(<N_{\mathrm{coll}}>)$')
+            ax[1, 1].set_xlabel(r'$<N_{\mathrm{part}}>$')
+            ax[1, 1].set_ylabel(r'$P(<N_{\mathrm{part}}>$)')
+            ax[0, 0].legend()
+            ax[0, 1].legend()
+            ax[1, 1].legend()
+            ax[1, 0].text(0.5, 0.5, 'made by yghuang', horizontalalignment='center', verticalalignment='center', transform=ax[1, 0].transAxes)
+            fig.tight_layout()
+            if args['save']:
+                fig.savefig(args['path'])
+            else:
+                fig.show()
+        return
+            
 
