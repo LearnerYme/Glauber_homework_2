@@ -1,4 +1,14 @@
-#Glauber_homework_2
+# Glauber_homework_2
+
+***
+
+**Update: 2020. 10. 27**
+
+Sample the theta angle with sin(theta), and sample the rho length with rho^2*Woods_Saxon(rho), and the plot of Ncoll would be right.
+
+BTW, phi angle using uniform is okay.
+
+***
 
 Homework of Introduction to High Energy Nucleon Physics, chapter 2: Glauber Model.
 
