@@ -59,24 +59,56 @@ class rdg():
         self.ylim = ylim
         return
     
-    def get_random(self):
+    def get_random(self, *args):
         while True:
             x = rd.uniform(self.xlim[0], self.xlim[1])
             f = rd.uniform(self.xlim[0], self.xlim[1])
-            fx = self.function(x)
+            fx = self.function(x, *args)
             if f <= fx:
                 return x
             
+class mc_sample():
+    @staticmethod
+    def sample_rho(r, woods_saxon):
+        return r*r*woods_saxon.function(r)
+    
+    @staticmethod
+    def sample_theta(theta):
+        return np.sin(theta)
+
+    @staticmethod
+    def sample_phi(low, high):
+        r'''
+        Not recommand for using this, please just sample phi by rd.uniform().
+        '''
+        return 1.0/(high - low)
+        
+
 class nucleon_generator():
-    def __init__(self, woods_saxon):
+    def __init__(self, woods_saxon, ws_max=None):
+        r'''
+        Note that, the variables can be sampled respected to following distributions:
+        rho:    rho^2*Woods_Saxon
+        theta:  sin(theta)
+        phi:    uniform
+        If you know the maximum of Woods Saxon value, tell the function to save computing resources.
+        '''
         self.A = woods_saxon.A
         self.r = []
-        ymax = woods_saxon.function(0)
-        ws_rdg = rdg(woods_saxon.function, [0, 15], [0, ymax])
+        self.theta = []
+        self.phi = []
+        #find the max boundary of r*r*ws
+        x = np.linspace(0, 15, 150)
+        if ws_max is None:
+            ws_max = mc_sample.sample_rho(x, woods_saxon)
+        rho_rdg = rdg(mc_sample.sample_rho, [0, 15], [0, ws_max])
+        theta_rdg = rdg(mc_sample.sample_theta, [0, np.pi], [0, 1])
+        #phi_rdg = rdg(mc_sample.sample_phi, [0, 2*np.pi], [0, 1])
         for _ in range(self.A):
-            self.r.append(ws_rdg.get_random())
+            self.r.append(rho_rdg.get_random(woods_saxon))
+            self.theta.append(theta_rdg.get_random())
         self.r = np.array(self.r)
-        self.theta = rd.uniform(0, np.pi, self.A)
+        self.theta = np.array(self.theta)
         self.phi = rd.uniform(0, 2*np.pi, self.A)
         self.s = self.r*np.sin(self.theta)
         self.x = self.s*np.cos(self.phi)
