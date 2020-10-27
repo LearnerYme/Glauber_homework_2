@@ -100,7 +100,7 @@ class nucleon_generator():
         #find the max boundary of r*r*ws
         x = np.linspace(0, 15, 150)
         if ws_max is None:
-            ws_max = mc_sample.sample_rho(x, woods_saxon)
+            ws_max = mc_sample.sample_rho(x, woods_saxon).max()
         rho_rdg = rdg(mc_sample.sample_rho, [0, 15], [0, ws_max])
         theta_rdg = rdg(mc_sample.sample_theta, [0, np.pi], [0, 1])
         #phi_rdg = rdg(mc_sample.sample_phi, [0, 2*np.pi], [0, 1])

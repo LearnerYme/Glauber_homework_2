@@ -395,8 +395,8 @@ class Nbp_mc(custom_function):
         return
 
     def simulation(self, b):
-        self.nuleon1 = nucleon_generator(Woods_Saxon(self.nuclei1)).get_particle('rect')
-        self.nuleon2 = nucleon_generator(Woods_Saxon(self.nuclei2)).get_particle('rect')
+        self.nuleon1 = nucleon_generator(Woods_Saxon(self.nuclei1), 4.4).get_particle('rect')
+        self.nuleon2 = nucleon_generator(Woods_Saxon(self.nuclei2), 4.4).get_particle('rect')
         self.nuleon2[:, 0] += b#shift target nucleon's x, and y will not change
         Ncoll = 0
         Npart = 0
